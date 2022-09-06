@@ -7,21 +7,28 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text("List"),
         centerTitle: true,),
       body: Column(
         children: [
-          const Text("Main Screen", style: TextStyle(color: Colors.white)),
           ElevatedButton(onPressed: () {
             // Go to the next page, the pages overlap
-            //Navigator.pushNamedAndRemoveUntil(context, '/todo', (route) => false);
-            //Navigator.pushNamed(context, '/todo');
+            //Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+            //Navigator.pushNamed(context, '/home');
             //Not overlap
-            Navigator.pushReplacementNamed(context, '/todo');
-          }, child: const Text("Next"))
-          ],
+            Navigator.pushReplacementNamed(context, '/home');
+          }, child: const Text("Saved objects")),
+          ElevatedButton(onPressed: () {
+            // Go to the next page, the pages overlap
+            //Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+            //Navigator.pushNamed(context, '/home');
+            //Not overlap
+            Navigator.pushReplacementNamed(context, '/camera');
+          }, child: const Text("Take photo")),
+
+        ],
       ),
     );
   }

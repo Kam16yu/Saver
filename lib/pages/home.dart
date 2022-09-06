@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+
 class Home extends StatefulWidget{
   const Home({Key? key}) : super(key: key);
 
@@ -12,11 +13,10 @@ class _HomeState extends State<Home> {
   List todolist = [];
   String userTodo = '';
 
-
   void _menuOpen() {
     Navigator.of(context).push(
         MaterialPageRoute(builder: (BuildContext context) {
-          return  Scaffold(
+          return Scaffold(
             appBar: AppBar(title: const Text("Menu"),),
             body: Row(
               children: [
@@ -24,20 +24,21 @@ class _HomeState extends State<Home> {
                   Navigator.pop(context);
                   Navigator.pushNamedAndRemoveUntil(context, '/',
                           (route) => false);
-                }, child: const Text("To main page")
+                },child: const Text("To main page")
                 ),
-                //RandomWords(),
+//RandomWords(),
               ],
             ),
-      );
-    })
+          );
+        })
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text("List"),
         centerTitle: true,
@@ -82,6 +83,8 @@ class _HomeState extends State<Home> {
           );
         },
       ),
+
+
 
         // Add element button
       floatingActionButton: FloatingActionButton(

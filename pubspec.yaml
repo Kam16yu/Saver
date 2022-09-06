@@ -27,7 +27,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  english_words: ^4.0.0
+  camera:
   cloud_firestore:
   firebase_core:
   flutter:
