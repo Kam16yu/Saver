@@ -4,7 +4,7 @@ import 'dart:io';
 
 // A screen that allows users to take a picture using a given camera.
 class TakePictureScreen extends StatefulWidget {
-  const TakePictureScreen({super.key, required this.camera,});
+  const TakePictureScreen({super.key,required this.camera});
   final CameraDescription camera;
 
   @override
@@ -14,6 +14,7 @@ class TakePictureScreen extends StatefulWidget {
 class TakePictureScreenState extends State<TakePictureScreen> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
+
 
   @override
   void initState() {
@@ -108,7 +109,7 @@ class DisplayPictureScreen extends StatelessWidget {
      floatingActionButton: FloatingActionButton(
         // Provide an onPressed callback.
         onPressed: ()  {
-          Navigator.pushNamed(context, '/');
+          Navigator.pushNamed(context, '/createCard');
         }, child: const Text("Save")),
     );
   }

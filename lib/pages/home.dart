@@ -1,5 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
+import '../database/dbhelper.dart';
+import '/database/model.dart';
+import 'package:flutter/widgets.dart';
 
 
 class Home extends StatefulWidget{
@@ -10,9 +15,69 @@ class Home extends StatefulWidget{
 }
 
 class _HomeState extends State<Home> {
-  List todolist = [];
-  String userTodo = '';
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+
+      //Appbar, Setting Menu Button
+      appBar: AppBar(
+        title: const Text("Cards"),
+        centerTitle: true,
+        actions: [
+          IconButton(onPressed: _menuOpen, icon: const Icon(Icons.menu_outlined))
+        ],
+      ),
+
+      //Body
+      body: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: FutureBuilder<List<DbCard>>(
+          future: fetchEmployeesFromDatabase(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return ListView.builder(
+                  itemCount: snapshot.data?.length ?? 1,
+                  itemBuilder: (context, index) {
+                    return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(snapshot.data?.elementAt(index).name ?? "2",
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 18.0)),
+                          Text(snapshot.data?.elementAt(index).text ?? "3",
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14.0)),
+                          Text(snapshot.data?.elementAt(index).time ?? "5",
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14.0)),
+                          Image.memory(snapshot.data?.elementAt(index).pict ?? Uint8List(1)),
+                          const Divider()
+                        ]);
+                  });
+            } else if (snapshot.hasError) {
+              return Text("${snapshot.error}");
+            }
+            return Container(alignment: AlignmentDirectional.center,child: const CircularProgressIndicator(),);
+          },
+        ),
+      ),
+
+        // Add element Button
+      floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.greenAccent,
+          onPressed: () {
+            Navigator.pushNamed(context, '/createCard');
+        }, // onPressed
+        child: const Icon(
+        Icons.add,
+        color: Colors.green,),
+        ),
+    );
+  }
+
+  //Setting menu
   void _menuOpen() {
     Navigator.of(context).push(
         MaterialPageRoute(builder: (BuildContext context) {
@@ -22,11 +87,10 @@ class _HomeState extends State<Home> {
               children: [
                 ElevatedButton(onPressed: (){
                   Navigator.pop(context);
-                  Navigator.pushNamedAndRemoveUntil(context, '/',
+                  Navigator.pushNamedAndRemoveUntil(context, '/createCard',
                           (route) => false);
-                },child: const Text("To main page")
+                },child: const Text("To create page")
                 ),
-//RandomWords(),
               ],
             ),
           );
@@ -34,90 +98,10 @@ class _HomeState extends State<Home> {
     );
   }
 
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text("List"),
-        centerTitle: true,
-        actions: [
-          IconButton(onPressed: _menuOpen, icon: const Icon(Icons.menu_outlined))
-        ],
-      ),
-      body: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection("items").snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) return const Text("No Data");
-          return ListView.builder(
-            itemCount: snapshot.data?.docs.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Dismissible(
-                key: Key(snapshot.data!.docs[index].id), //get id key
-                child: Card(
-                  // get elem text from firebase
-                  child: ListTile(title: Text(snapshot.data!.docs[index].get("item")),
-                      //icon delete elem
-                      trailing: IconButton(
-                        icon: const Icon(
-                          Icons.delete,
-                          color: Colors.orange,
-                        ),
-                        onPressed: () {
-                          //setState(() {todolist.removeAt(index);}); // delete elem
-                          FirebaseFirestore.instance.collection("items").
-                          doc(snapshot.data?.docs[index].id).delete();
-                        },
-                      )
-                  ),
-                ),
-                onDismissed: (directional) {
-                  //if (directional == DismissDirection.endToStart) swap direction check
-                  //setState(() {todolist.removeAt(index);}); // delete elem
-                  FirebaseFirestore.instance.collection("items").
-                  doc(snapshot.data?.docs[index].id).delete();
-                },
-              );
-            },
-          );
-        },
-      ),
-
-
-
-        // Add element button
-      floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.greenAccent,
-          onPressed: () {
-          showDialog(context: context, builder: (BuildContext context) {
-            // raise AlertDialog adding element
-            return AlertDialog(
-                title: const Text("Add element"),
-                content: TextField(
-                  onChanged: (String value) {
-                    userTodo = value;
-                  }, //onChanged
-                ),
-                actions: [
-                  ElevatedButton(onPressed: (){
-                    //State add element
-                    //setState(() {todolist.add(userTodo);});
-                    //Firebase add element
-                    FirebaseFirestore.instance.collection("items")
-                        .add({'item': userTodo});
-
-                    Navigator.of(context).pop();
-                  }, child: const Text("Add"))
-              ],
-            );
-            } //builder
-          ); // showDialog
-        }, // onPressed
-        child: const Icon(
-        Icons.add,
-        color: Colors.green,),
-        ),
-    );
+  Future<List<DbCard>> fetchEmployeesFromDatabase() async {
+    var dbHelper = Dbhelper();
+    Future<List<DbCard>> cards = dbHelper.getCards();
+    return cards;
   }
 }
+

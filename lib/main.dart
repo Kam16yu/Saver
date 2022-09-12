@@ -1,9 +1,9 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:list_of_importants/pages/home.dart';
-import 'package:list_of_importants/pages/main_screen.dart';
+import 'package:list_of_importants/pages/create_card.dart';
 import 'package:list_of_importants/pages/usecamera.dart';
-// App List of items, add/delete, 2 screens, used Firebase.
+// App List of items, add/delete, 2 screens, SQLite.
 
 
 Future<void> main() async {
@@ -19,8 +19,8 @@ Future<void> main() async {
     theme: ThemeData(primaryColor: Colors.cyan,),
     initialRoute: '/',
     routes: {
-      '/': (context) => MainScreen(),
-      '/home': (context) => Home(),
+      '/': (context) => Home(),
+      '/createCard': (context) => CreateCard(),
       '/camera': (context) =>  TakePictureScreen(camera: firstCamera)
     },
   ));
