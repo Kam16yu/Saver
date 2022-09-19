@@ -1,8 +1,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:list_of_importants/pages/home.dart';
-import 'package:list_of_importants/pages/create_card.dart';
-import 'package:list_of_importants/pages/usecamera.dart';
+import 'package:saver/pages/home.dart';
+import 'package:saver/pages/create_card.dart';
+import 'package:saver/pages/usecamera.dart';
 // App List of items, add/delete, 2 screens, SQLite.
 
 
@@ -19,9 +19,9 @@ Future<void> main() async {
     theme: ThemeData(primaryColor: Colors.cyan,),
     initialRoute: '/',
     routes: {
-      '/': (context) => Home(),
-      '/createCard': (context) => CreateCard(),
-      '/camera': (context) =>  TakePictureScreen(camera: firstCamera)
+      '/': (context) => Home(camera: firstCamera),
+      '/CreateCardScreen': (context) => CreateCardScreen(),
+      '/TakePictureScreen': (context) =>  TakePictureScreen(camera: firstCamera)
     },
   ));
 }

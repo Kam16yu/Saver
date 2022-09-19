@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'model.dart';
@@ -7,12 +6,11 @@ import 'model.dart';
 
 class Dbhelper {
   static Database? _db;
-
+  // setting getter for database object
   Future<Database> get database async {
-
     if (_db != null) {
       return _db!;
-    } else {_db = await dbInit();
+    } else {_db = await dbInit(); // first run
     return _db!;
     }
   }
@@ -29,7 +27,6 @@ class Dbhelper {
       version: 1,
       // When the database is first created, create a table to store dogs.
       onCreate: (db, version) {
-        print("Create table");
         // Run the CREATE TABLE statement on the database.
         return db.execute(
           'CREATE TABLE cards (id INTEGER PRIMARY KEY AUTOINCREMENT,'
@@ -44,10 +41,8 @@ class Dbhelper {
   Future<void> insertCard(DbCard card) async {
     // Get a reference to the database.
     final db = await database;
-
     // Insert the Card into the correct table. You might also specify the
     // `conflictAlgorithm` to use in case the same dog is inserted twice.
-    //
     // In this case, replace any previous data.
     await db.insert(
       'cards',
@@ -60,11 +55,9 @@ class Dbhelper {
   Future<List<DbCard>> getCards() async {
     // Get a reference to the database.
     final db = await database;
-
-    // Query the table for all The Dogs.
+    // Query the table for all Cards.
     final List<Map<String, dynamic>> maps = await db.query('cards');
-
-    // Convert the List<Map<String, dynamic> into a List<Dog>.
+    // Convert the List<Map<String, dynamic> into a List<Card>.
     return List.generate(maps.length, (i) {
       return DbCard(
         id: maps[i]['id'],
@@ -79,63 +72,47 @@ class Dbhelper {
   Future<void> updateCard(DbCard card) async {
     // Get a reference to the database.
     final db = await database;
-
-    // Update the given Dog.
+    // Update the given Card.
     await db.update('cards', card.toMap(),
-      // Ensure that the Dog has a matching id.
+      // Ensure that the Card has a matching id.
       where: 'id = ?',
-      // Pass the Dog's id as a whereArg to prevent SQL injection.
+      // Pass the Card id as a whereArg to prevent SQL injection.
       whereArgs: [card.id],
     );
   }
 
-  Future<void> deleteCard(int id) async {
+  Future<bool> deleteCard(int id) async {
     // Get a reference to the database.
     final db = await database;
-
-    // Remove the Dog from the database.
-    await db.delete(
+    // Remove the Card from the DB.
+    int rowsEffected = await db.delete(
       'cards',
-      // Use a `where` clause to delete a specific dog.
+      // Use a `where` clause to delete a specific card.
       where: 'id = ?',
-      // Pass the Dog's id as a whereArg to prevent SQL injection.
+      // Pass the Card id as a whereArg to prevent SQL injection.
       whereArgs: [id],
     );
+    return rowsEffected > 0;
   }
 
-  Future<void> simpleTest(DbCard card) async {
-    // Create a Dog and add it to the dogs table
-    var fido = DbCard(
-        id: 0,
-        name: 'Fido',
-        text: "simple card text",
-        pict: Uint8List(1),
-        time: DateTime.now().toString(),
-    );
-
-    await insertCard(fido);
-
-    // Now, use the method above to retrieve all the dogs.
-    print(await getCards()); // Prints a list that include Fido.
-
-    // Update Fido's age and save it to the database.
-    fido = DbCard(
-      id: fido.id,
-      name: fido.name,
-      text: "simple card text2",
-      pict: Uint8List(1),
-      time: DateTime.now().toString(),
-    );
-
-    await updateCard(fido);
-
-    // Print the updated results.
-    print(await getCards()); // Prints Fido with age 42.
-
-    // Delete Fido from the database.
-    await deleteCard(fido.id);
-
-    // Print the list of cards (empty).
-    print(await getCards());
+  // delete all notes
+  Future<bool> deleteAll() async {
+    final Database db = await database;
+    int changes = await db.rawDelete('DELETE FROM cards');
+    return changes > 0;
   }
+
+  Future <int> maxId() async {
+  var maxid = 1;
+  final db = await database;
+  // get max id from DB
+  await db.query('cards', where: "id=(SELECT MAX(id) FROM cards)").then((value){
+    if (value.isNotEmpty) {
+    maxid = int.parse(value[0]['id'].toString());
+    return maxid;}
+    }); //then query
+  return maxid;
+  }
+
+
 }
