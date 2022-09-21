@@ -6,16 +6,11 @@ class DbCard {
   var text = "null text";
   var pict = Uint8List(1);
   var time = "null time";
+  var rec = Uint8List(1);
+
   //Constructors
   DbCard({required this.id, required this.name, required this.text,
-    required this.pict, required this.time});
-
-  DbCard.fromMap(Map map) {
-    name = map[name];
-    text = map[text];
-    pict = map[pict];
-    time = map[time];
-  }
+    required this.pict, required this.time, required this.rec});
 
 
   // Convert a Card into a Map. The keys must correspond to the names of the
@@ -26,7 +21,8 @@ class DbCard {
       'name': name,
       'text': text,
       'pict': pict,
-      'time': time
+      'time': time,
+      'rec' : rec
     };
   }
 

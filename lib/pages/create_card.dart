@@ -1,8 +1,12 @@
+
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../database/dbhelper.dart';
 import '../database/model.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:record/record.dart';
+import  'package:audioplayers/audioplayers.dart';
 
 class CreateCardScreen extends StatefulWidget {
   const CreateCardScreen({Key? key}) : super(key: key);
@@ -15,22 +19,25 @@ class _CreateCardScreenState extends State<CreateCardScreen> {
   var cardName = '';
   var cardText = '';
   var pict = Uint8List(1);
+  var rec = Uint8List(1);
+  var access = 1;
   final ImagePicker _picker = ImagePicker();
 
-  @override
-  void initState() {
-    super.initState();
-
-  }
+  final audioRecorder = Record();
+  final player = AudioPlayer();
 
   @override
   Widget build(BuildContext context) {
-    final dbcard = ModalRoute.of(context)?.settings.arguments as DbCard?;
-    if (dbcard != null){
-      id =  dbcard.id;
-      cardName = dbcard.name;
-      cardText = dbcard.text;
-      pict = dbcard.pict;
+    //RECEIVER from route
+    final tempcard = ModalRoute.of(context)?.settings.arguments as DbCard?;
+    if ((tempcard != null) && (access == 1)){
+      id =  tempcard.id;
+      cardName = tempcard.name;
+      cardText = tempcard.text;
+      pict = tempcard.pict;
+      rec = tempcard.rec;
+      access = 0;
+      print("if Card not null: $rec");
     } else {
       Dbhelper db = Dbhelper();
       //get max ID in DB,then create Card object
@@ -38,6 +45,10 @@ class _CreateCardScreenState extends State<CreateCardScreen> {
         id = value + 1;
       });
     }
+    if (rec.length > 1) {
+      player.setSourceBytes(rec);
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       //AppBar, Save button
@@ -63,7 +74,8 @@ class _CreateCardScreenState extends State<CreateCardScreen> {
                       name: cardName,
                       text: cardText,
                       pict: pict,
-                      time: DateTime.now().toString().substring(0,19));
+                      time: DateTime.now().toString().substring(0,19),
+                      rec: rec);
                 // push Card in DB, then go to Home page
                 db.insertCard(card).then((_) =>
                 Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false));
@@ -71,7 +83,6 @@ class _CreateCardScreenState extends State<CreateCardScreen> {
               child: const Text("Save"),)
         ],
       ),
-
       // 2 Textfields, 1 image
       body: Column(
         children: [
@@ -93,17 +104,40 @@ class _CreateCardScreenState extends State<CreateCardScreen> {
               onChanged:(val) => cardText = val,
             ),
           ),
+          //PLAY RECORD
+          if (rec.length > 1) Card(child: Row(
+               children:[
+                 IconButton(
+                  padding: const EdgeInsets.fromLTRB(8.0,8.0,20.0,8.0),
+                  icon: const Icon(Icons.play_arrow),
+                  onPressed: () async{
+                  //await player.setSourceBytes(rec);
+                  await player.resume();
+                 }),
+                 IconButton(
+                     padding: const EdgeInsets.fromLTRB(8.0,8.0,20.0,8.0),
+                     icon: const Icon(Icons.pause),
+                     onPressed: () async{
+                       await player.pause();
+                     }),
+                 IconButton(
+                     padding: const EdgeInsets.fromLTRB(8.0,8.0,20.0,8.0),
+                     icon: const Icon(Icons.stop),
+                     onPressed: () async{
+                       await player.stop();
+                     }),
+           ]),),
+          //SHOW PICTURE
           Expanded(
-           child:
-          Image.memory(pict,
-            fit: BoxFit.fitWidth,
-            errorBuilder:  (BuildContext context,
-                Object exception, StackTrace? stackTrace) {
+           child:Image.memory(pict,
+                  fit: BoxFit.fitWidth,
+                  errorBuilder:  (BuildContext context,
+                    Object exception, StackTrace? stackTrace) {
               return const Text("");}, //Error Builder
           ),)
         ]),
 
-      // Bottom bar, MIC?, CAMERA, PICTURE?, DELETE?
+      // BOTTOM BAR: DELETE, MIC, PICTURE, CAMERA
       bottomNavigationBar: BottomAppBar(
         color: Colors.white38,
         elevation: 10,
@@ -111,6 +145,7 @@ class _CreateCardScreenState extends State<CreateCardScreen> {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            //DELETE Card
             IconButton(
               padding: const EdgeInsets.fromLTRB(8.0,8.0,20.0,8.0),
               icon: const Icon(Icons.delete),
@@ -120,11 +155,13 @@ class _CreateCardScreenState extends State<CreateCardScreen> {
                 Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
                 },
               iconSize: 40.0,),
+            //RECORD sounds
             IconButton(
               padding: const EdgeInsets.fromLTRB(8.0,8.0,20.0,8.0),
               icon: const Icon(Icons.mic),
-              onPressed: () {},
+              onPressed: () async => micdialog(),
               iconSize: 40.0,),
+            //ADD Image
             IconButton(
               padding: const EdgeInsets.fromLTRB(8.0,8.0,20.0,8.0),
               icon: const Icon(Icons.image),
@@ -136,23 +173,60 @@ class _CreateCardScreenState extends State<CreateCardScreen> {
               },
               iconSize: 40.0,
             ),
+            //ADD Photo
             IconButton(
                 // Go to the next page, the pages overlap
               icon: const Icon(Icons.camera),
               onPressed: () {
-                DbCard tempCard = DbCard(id: id,
+                DbCard tempCard = DbCard(
+                    id: id,
                     name: cardName,
                     text: cardText,
                     pict: pict,
-                    time: DateTime.now().toString().substring(0,19));
+                    time: DateTime.now().toString().substring(0,19),
+                    rec: rec);
                 Navigator.pushNamed(context, '/TakePictureScreen',
                 arguments: tempCard);
                 },
               iconSize: 40.0,
               ),
+
         ]),
       ),
     );
+  }
+
+  Future micdialog () async {
+    // Check and request permission
+    if (await audioRecorder.hasPermission()) {
+    // Start recording
+    await audioRecorder.start();
+    }
+    return showDialog(context: context,
+        builder: (BuildContext context) =>
+        AlertDialog(
+         title: const Text('RECORD BEGIN'),
+         content: const Text(''),
+         actions: <Widget>[
+         TextButton(
+           onPressed: () async{
+               await audioRecorder.dispose();
+               Navigator.pop(context);
+           },
+           child: const Text('Cancel'),
+    ),
+         TextButton(
+            onPressed: () {
+              audioRecorder.stop().then((value) {
+                File audioFile = File(value!);
+                setState(() => rec = audioFile.readAsBytesSync());
+                print(rec);
+                Navigator.pop(context);
+              });
+            },
+            child: const Text('STOP record'),
+        )]
+    ));
   }
 }
 

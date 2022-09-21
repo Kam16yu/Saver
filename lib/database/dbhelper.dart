@@ -30,7 +30,7 @@ class Dbhelper {
         // Run the CREATE TABLE statement on the database.
         return db.execute(
           'CREATE TABLE cards (id INTEGER PRIMARY KEY AUTOINCREMENT,'
-              ' name TEXT, text TEXT, pict BLOB, time TEXT)',
+              ' name TEXT, text TEXT, pict BLOB, time TEXT, rec BLOB)',
         );
       },
     );
@@ -65,6 +65,7 @@ class Dbhelper {
         text: maps[i]['text'],
         pict: maps[i]['pict'],
         time: maps[i]['time'],
+        rec: maps[i]['rec'],
       );
     });
   }

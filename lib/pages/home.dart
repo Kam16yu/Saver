@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -14,6 +15,8 @@ class Home extends StatefulWidget{
 }
 
 class _HomeState extends State<Home> {
+  final player = AudioPlayer();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,33 +49,52 @@ class _HomeState extends State<Home> {
                       ),
                       borderRadius: const BorderRadius.all(Radius.circular(12)),
                     ),
-
+                    //PRESS SPLASH
                     child:InkWell(
                       splashColor: Colors.blue.withAlpha(30),
                       onTap: () {
                         Navigator.pushNamed(context, '/CreateCardScreen',
                             arguments: snapshot.data?.elementAt(index));
                       },
-
+                      //CARD BODY
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-
                           ListTile(
-                            leading: Image.memory(snapshot.data?.elementAt(index)
-                              .pict ?? Uint8List(1),
-                            errorBuilder:  (BuildContext context,
-    Object exception, StackTrace? stackTrace) {
-                            return const Text("");
-                            },
-                            ),
-                            title: Text(snapshot.data?.elementAt(index).name ??
-                              "2"),
-                            subtitle:Text(snapshot.data?.elementAt(index).text ??
-                              "3",),
+                          leading:Image.memory(snapshot.data?.elementAt(index)
+                                  .pict ?? Uint8List(1),
+                                  errorBuilder:  (BuildContext context,
+                                  Object exception, StackTrace? stackTrace) {
+                                  return const Text("");
+                                  },),
+                          title: Text(snapshot.data?.elementAt(index).name ?? "2"),
+                          subtitle:Text(snapshot.data?.elementAt(index).text ?? "3",),
                           ),
-
+                          if (snapshot.data!.elementAt(index).rec.length > 1)
+                          Card(child: Row(
+                              children:[
+                                IconButton(
+                                    padding: const EdgeInsets.fromLTRB(8.0,8.0,20.0,8.0),
+                                    icon: const Icon(Icons.play_arrow),
+                                    onPressed: () async{
+                                      await player.setSourceBytes(snapshot.data!.elementAt(index).rec);
+                                      await player.resume();
+                                    }),
+                                IconButton(
+                                    padding: const EdgeInsets.fromLTRB(8.0,8.0,20.0,8.0),
+                                    icon: const Icon(Icons.pause),
+                                    onPressed: () async{
+                                      await player.pause();
+                                    }),
+                                IconButton(
+                                    padding: const EdgeInsets.fromLTRB(8.0,8.0,20.0,8.0),
+                                    icon: const Icon(Icons.stop),
+                                    onPressed: () async{
+                                      await player.stop();
+                                    }),
+                              ]),),
+                          //CARD BUTTONS
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: <Widget>[

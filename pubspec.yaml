@@ -27,6 +27,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  audioplayers: ^1.0.1
+  record: ^4.4.0
   sqflite:
   image_picker:
   camera:
