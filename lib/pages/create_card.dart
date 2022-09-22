@@ -58,12 +58,11 @@ class _CreateCardScreenState extends State<CreateCardScreen> {
         actions: [
           TextButton(
             style:  TextButton.styleFrom(
+              foregroundColor: Colors.white,
               backgroundColor: Colors.blueGrey,
               shape: const BeveledRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(2))),
-              primary: Colors.white,
-              textStyle: const TextStyle(fontSize: 15),
-              ),
+              textStyle: const TextStyle(fontSize: 15),),
               onPressed: () {
                 // Go to the next page, the pages overlap
                 //Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
@@ -102,17 +101,15 @@ class _CreateCardScreenState extends State<CreateCardScreen> {
               border: OutlineInputBorder(),
               hintText: 'Enter text',),
               onChanged:(val) => cardText = val,
-            ),
-          ),
+            ),),
           //PLAY RECORD
           if (rec.length > 1) Card(child: Row(
                children:[
                  IconButton(
-                  padding: const EdgeInsets.fromLTRB(8.0,8.0,20.0,8.0),
-                  icon: const Icon(Icons.play_arrow),
-                  onPressed: () async{
-                  //await player.setSourceBytes(rec);
-                  await player.resume();
+                     padding: const EdgeInsets.fromLTRB(8.0,8.0,20.0,8.0),
+                     icon: const Icon(Icons.play_arrow),
+                     onPressed: () async{
+                     await player.resume();
                  }),
                  IconButton(
                      padding: const EdgeInsets.fromLTRB(8.0,8.0,20.0,8.0),
@@ -136,7 +133,6 @@ class _CreateCardScreenState extends State<CreateCardScreen> {
               return const Text("");}, //Error Builder
           ),)
         ]),
-
       // BOTTOM BAR: DELETE, MIC, PICTURE, CAMERA
       bottomNavigationBar: BottomAppBar(
         color: Colors.white38,
@@ -149,12 +145,12 @@ class _CreateCardScreenState extends State<CreateCardScreen> {
             IconButton(
               padding: const EdgeInsets.fromLTRB(8.0,8.0,20.0,8.0),
               icon: const Icon(Icons.delete),
+              iconSize: 40.0,
               onPressed: () {
                 var dbHelper = Dbhelper();
                 dbHelper.deleteCard(id);
                 Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-                },
-              iconSize: 40.0,),
+                },),
             //RECORD sounds
             IconButton(
               padding: const EdgeInsets.fromLTRB(8.0,8.0,20.0,8.0),
@@ -165,18 +161,18 @@ class _CreateCardScreenState extends State<CreateCardScreen> {
             IconButton(
               padding: const EdgeInsets.fromLTRB(8.0,8.0,20.0,8.0),
               icon: const Icon(Icons.image),
+              iconSize: 40.0,
               onPressed: () async {
                 XFile? image = await _picker.pickImage(source: ImageSource.gallery);
                 image?.readAsBytes().then((value) {
                   setState(() {pict = value;});
                 });
-              },
-              iconSize: 40.0,
-            ),
+              },),
             //ADD Photo
             IconButton(
-                // Go to the next page, the pages overlap
+              // Go to the next page, the pages overlap
               icon: const Icon(Icons.camera),
+              iconSize: 40.0,
               onPressed: () {
                 DbCard tempCard = DbCard(
                     id: id,
@@ -188,9 +184,7 @@ class _CreateCardScreenState extends State<CreateCardScreen> {
                 Navigator.pushNamed(context, '/TakePictureScreen',
                 arguments: tempCard);
                 },
-              iconSize: 40.0,
-              ),
-
+            ),
         ]),
       ),
     );
@@ -225,8 +219,10 @@ class _CreateCardScreenState extends State<CreateCardScreen> {
               });
             },
             child: const Text('STOP record'),
-        )]
-    ));
+         )
+         ]
+        )
+    );
   }
 }
 
